@@ -1,0 +1,17 @@
+{
+  "name": "shi_inator",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260116.0",
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "grammy": "^1.39.3",
+    "wrangler": "^4.59.2"
+  }
+}
