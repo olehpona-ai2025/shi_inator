@@ -1,5 +1,11 @@
 name = "shi-inator"
-main = "index.ts"
+main = "src/bot.ts"
 compatibility_date = "2026-01-01"
+
 [observability.logs]
 enabled = true
+
+[[d1_databases]]
+binding = "shi_inator_db"
+database_name = "shi_inator_db"
+database_id = "2d345473-d7cc-46bf-a354-ec82e272c85b"

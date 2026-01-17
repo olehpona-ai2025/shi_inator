@@ -5,49 +5,51 @@ interface ActionConfig {
     text?: string;
     animation?: string;
     reaction?: string;
-    reply?: boolean; // Чи відповідати реплаєм, чи просто писати в чат
+    reply?: boolean;
 }
 
-// Конфігурація юзера:
-// 1. Може мати глобальні дії (наслідує ActionConfig)
-// 2. Може мати специфічні оверрайди для чатів
-interface UserConfig extends ActionConfig {
-    chats?: Record<string, ActionConfig>;
+interface UserConfig extends ActionConfig { }
+
+interface ChatConfig {
+    users: Record<number, UserConfig>;
 }
 
-// Інтерфейс змінних оточення
 interface Env {
     BOT_TOKEN: string;
 }
 
-// --- Конфігурація ---
-
-const USER_CONFIG: Record<number, UserConfig> = {
-    5923340571: {
-        reaction: "😍"
-    },
-    1157828407: {
-        reaction: "🤡"
-    },
-    1125505843: {
-        reaction: "🔥"
-    },
-    534062947: {
-        // Тут можуть бути глобальні налаштування, наприклад:
-        // reaction: "👍", 
-        chats: {
-            "-1003545584995": {
+const CHATS_CONFIG: Record<string, ChatConfig> = {
+    "-1003545584995": {
+        users: {
+            5923340571: { reaction: "😍" },
+            1157828407: { reaction: "🤡" },
+            1125505843: { reaction: "🔥" },
+            534062947: {
                 sticker: "CAACAgIAAxkBAAOXaWfvXGwuOBTV0Csy1yb5F9ldo44AAiFaAAJE2OFIDpOkrA4hvX04BA",
                 reply: true
-                // Цей стікер спрацює тільки в цьому чаті
             }
         }
-    }
-};
+    },
+    "-1002750833285": {
+        users: {
+            1125505843: { reaction: "🔥" },
+            5923340571: { reaction: "😍" },
+        }
+    },
+    "-4919067380": {
+        users: {
+            1125505843: { reaction: "🔥" },
+            5923340571: { reaction: "😍" },
+            1157828407: { reaction: "🤡" }
+        }
+    },
+    "-5097826431" : {
+        users: {
+            1157828407: { reaction: "🤡" }
+        }
+    }};
 
 const ADMIN_ID = 1157828407;
-
-// --- Основна логіка ---
 
 export default {
     async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
@@ -162,49 +164,51 @@ export default {
         });
 
         // 5. Моніторинг (Основна логіка мерджу конфігів)
+        // 5. Моніторинг (Основна логіка мерджу конфігів)
         bot.on("message", async (ctx) => {
             const userId = ctx.from.id;
-            const chatId = ctx.chat.id;
+            const chatId = String(ctx.chat.id); // Convert to string for lookup
 
-            if (userId in USER_CONFIG) {
-                const baseConfig = USER_CONFIG[userId];
+            // Check if chat is configured
+            if (chatId in CHATS_CONFIG) {
+                const chatConfig = CHATS_CONFIG[chatId];
 
-                // Створюємо фінальний конфіг: спочатку беремо глобальний
-                // Використовуємо Partial<ActionConfig> щоб TS не сварився при створенні пустих об'єктів
-                let config: ActionConfig = { ...baseConfig };
+                // Check if user is configured in this chat
+                if (userId in chatConfig.users) {
+                    const config = chatConfig.users[userId];
 
-                // Якщо є оверрайд для цього чату, накладаємо його зверху
-                if (baseConfig.chats && baseConfig.chats[String(chatId)]) {
-                    config = { ...config, ...baseConfig.chats[String(chatId)] };
-                }
+                    // Витягуємо параметри, щоб не звертатись постійно через крапку
+                    const { reply: shouldReply, reaction, text, sticker, animation } = config;
 
-                // Витягуємо параметри, щоб не звертатись постійно через крапку
-                const { reply: shouldReply, reaction, text, sticker, animation } = config;
-
-                // Функція відправки
-                const sendResponse = async (method: "text" | "sticker" | "animation", payload: string) => {
-                    try {
-                        if (method === "text") {
-                            shouldReply ? await ctx.reply(payload) : await ctx.api.sendMessage(chatId, payload);
-                        } else if (method === "sticker") {
-                            shouldReply ? await ctx.replyWithSticker(payload) : await ctx.api.sendSticker(chatId, payload);
-                        } else if (method === "animation") {
-                            shouldReply ? await ctx.replyWithAnimation(payload) : await ctx.api.sendAnimation(chatId, payload);
+                    // Функція відправки
+                    const sendResponse = async (method: "text" | "sticker" | "animation", payload: string) => {
+                        try {
+                            if (method === "text") {
+                                shouldReply ? await ctx.reply(payload) : await ctx.api.sendMessage(chatId, payload);
+                            } else if (method === "sticker") {
+                                shouldReply ? await ctx.replyWithSticker(payload) : await ctx.api.sendSticker(chatId, payload);
+                            } else if (method === "animation") {
+                                shouldReply ? await ctx.replyWithAnimation(payload) : await ctx.api.sendAnimation(chatId, payload);
+                            }
+                        } catch (e) {
+                            console.error("Error sending response:", e);
                         }
-                    } catch (e) {
-                        console.error("Error sending response:", e);
-                    }
-                };
+                    };
 
-                // Виконання дій
-                if (reaction) {
-                    await ctx.api.setMessageReaction(chatId, ctx.message.message_id, [
-                        { type: "emoji", emoji: reaction as any },
-                    ]);
+                    // Виконання дій
+                    if (reaction) {
+                        try {
+                            await ctx.api.setMessageReaction(chatId, ctx.message.message_id, [
+                                { type: "emoji", emoji: reaction as any },
+                            ]);
+                        } catch (e) {
+                            console.error("Error setting reaction:", e);
+                        }
+                    }
+                    if (text) await sendResponse("text", text);
+                    if (animation) await sendResponse("animation", animation);
+                    if (sticker) await sendResponse("sticker", sticker);
                 }
-                if (text) await sendResponse("text", text);
-                if (animation) await sendResponse("animation", animation);
-                if (sticker) await sendResponse("sticker", sticker);
             }
         });
         try {
