@@ -1,4 +1,4 @@
-import { Bot, Composer } from "grammy"
+import { Bot, Composer, InlineKeyboard } from "grammy"
 import { CfContext } from "./types";
 import { ADMIN_ID } from "./const";
 
@@ -95,12 +95,12 @@ function buildStatsMessage(data: DataResult[]): string {
     const leaders = data.filter(u => u.score >= 0);
     if (leaders.length > 0) {
         responseText += "🏆 **Герої сьогодення:**\n";
-        leaders.forEach((u, i) => responseText += `${i + 1}. ${escapeMd(u.name)}: *${u.score}*\n`);
+        leaders.forEach((u, i) => responseText += `${i + 1}. @${escapeMd(u.name)}: *${u.score}*\n`);
     }
     const losers = data.filter(u => u.score < 0).reverse();
     if (losers.length > 0) {
         responseText += "\n🤡 **Крінж-відділ:**\n";
-        losers.forEach((u, i) => responseText += `${i + 1}. ${escapeMd(u.name)}: *${u.score}*\n`);
+        losers.forEach((u, i) => responseText += `${i + 1}. @${escapeMd(u.name)}: *${u.score}*\n`);
     }
     return responseText;
 }
@@ -126,8 +126,11 @@ ReactionComposer.chatType("private").command("weekstats", async (ctx, next) => {
         return;
     }
 
+    const inlineKeyboard = new InlineKeyboard()
+        .webApp("Деталі", "https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+
     const statsMessage = buildStatsMessage(data);
-    await ctx.reply(statsMessage, { parse_mode: "Markdown" });
+    await ctx.reply(statsMessage, { parse_mode: "Markdown", reply_markup: inlineKeyboard });
     await next();
 });
 
@@ -139,7 +142,10 @@ async function sendStatsToAllowedChats(bot: Bot<CfContext>, d1: D1Database) {
         }
         const statsMessage = buildStatsMessage(data);
         try {
-            await bot.api.sendMessage(chatId, statsMessage, { parse_mode: "Markdown" });
+
+            const inlineKeyboard = new InlineKeyboard()
+                .webApp("Деталі", "https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+            await bot.api.sendMessage(chatId, statsMessage, { parse_mode: "Markdown", reply_markup: inlineKeyboard });
         } catch (e) {
             console.error(`❌ Помилка при відправці статистики до чату ${chatId}:`, e);
         }

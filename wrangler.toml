@@ -2,6 +2,9 @@ name = "shi-inator"
 main = "src/index.ts"
 compatibility_date = "2026-01-01"
 
+[placement]
+mode = "smart"
+
 [observability.logs]
 enabled = true
 
