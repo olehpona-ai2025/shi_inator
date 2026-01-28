@@ -6,6 +6,10 @@
     "moduleResolution": "bundler",
     "strict": true,
     "skipLibCheck": true,
+    "baseUrl": ".", 
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
   "include": ["worker-configuration.d.ts", "src/**/*.ts"]
 }

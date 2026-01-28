@@ -1,12 +1,20 @@
 import { Bot, webhookCallback } from "grammy";
-import { CfContext } from "./types";
-import { ReactionComposer, sendStatsToAllowedChats } from "./reactions";
-import { userCustomComposer } from "./userCustom";
+import { CfContext } from "@/types";
+import { ReactionComposer, sendStatsToAllowedChats } from "@/routers/reactions";
+import { userCustomComposer } from "@/routers/userCustom";
+import { customMessagesComposer } from "./routers/customMessages";
+import { debugComposer } from "./routers/debug";
+import { config, loadConfig } from "./config";
 
 
 export default {
     async fetch(request, env, ctx): Promise<Response> {
         const bot = new Bot<CfContext>(env.BOT_TOKEN);
+        await loadConfig(env);
+
+        bot.catch((err) => {
+            console.error("💥 BOT ERROR:", err);
+        });
         
         bot.use(async (grammyCtx, next) => {
             grammyCtx.db = env.shi_inator_db;
@@ -18,26 +26,10 @@ export default {
             await ctx.reply(`Привіт! Твій ID: ${ctx.from?.id}`);
         });
 
-        const pm = bot.chatType("private");
-        pm.on("message", async (ctx, next) => {
-            if (ctx.message.text?.startsWith("/")) return next();
-
-            const userId = ctx.from.id;
-            let responseText = `👤 **Твій User ID:** \`${userId}\``;
-
-            if (ctx.message.sticker) {
-                responseText += `\n\n🤡 **Sticker ID:**\n\`${ctx.message.sticker.file_id}\``;
-            }
-            if (ctx.message.animation) {
-                responseText += `\n\n🎬 **GIF ID:**\n\`${ctx.message.animation.file_id}\``;
-            }
-
-            await ctx.reply(responseText, { parse_mode: "Markdown" });
-            return next();
-        });
-
+        bot.use(debugComposer);
         bot.use(ReactionComposer);
         bot.use(userCustomComposer);
+        bot.use(customMessagesComposer);
 
         try {
             return await webhookCallback(bot, "cloudflare-mod")(request);
@@ -48,16 +40,12 @@ export default {
     },
     async scheduled(controller, env, ctx) {
         const bot = new Bot<CfContext>(env.BOT_TOKEN);
-        await sendStatsToAllowedChats(bot, env.shi_inator_db);
-        console.log("🧹 Починаю щотижневу очистку бази...");
+        await sendStatsToAllowedChats(bot.api, env.shi_inator_db);
+
         try {
             await env.shi_inator_db.prepare("DELETE FROM week_stats").run();
-
-            console.log("✅ База успішно очищена. Новий тиждень розпочато!");
         } catch (e) {
-            console.error("❌ Помилка при очистці бази:", e);
+            console.error("DB drop error", e);
         }
     },
-} satisfies ExportedHandler<Env & {
-    BOT_TOKEN: string;
-}>;
+} satisfies ExportedHandler<Env>;
