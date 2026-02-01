@@ -40,6 +40,7 @@ export default {
     },
     async scheduled(controller, env, ctx) {
         const bot = new Bot<CfContext>(env.BOT_TOKEN);
+        await loadConfig(env);
         await sendStatsToAllowedChats(bot.api, env.shi_inator_db);
 
         try {
