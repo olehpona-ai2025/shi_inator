@@ -108,7 +108,7 @@ async function sendStats(bot: SendTrait, d1: D1Database, chatId: number) {
     try {
 
         const inlineKeyboard = new InlineKeyboard()
-            .url("Деталі", "https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+            .url("Деталі", "https://www.youtube.com/watch?v=mHJ3l18YqNM");
         await bot.sendMessage(chatId, statsMessage, { parse_mode: "Markdown", reply_markup: inlineKeyboard });
     } catch (e) {
         console.error(`❌ Помилка при відправці статистики до чату ${chatId}:`, e);
