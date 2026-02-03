@@ -3,13 +3,13 @@ export interface MessageCreationData {
 }
 
 export async function addNewMessage(db: D1Database, data: MessageCreationData) {
-    db.prepare(
+    return db.prepare(
         "INSERT OR IGNORE INTO week_stats (msg_id, chat_id, author_id, author_nickname) VALUES (?, ?, ?, ?)"
     ).bind(data.message_id, data.chat_id, data.author_id, data.author_name).run()
 }
 
 export async function updateMessageScore(db: D1Database, chat_id: number, msg_id: number, score: number) {
-    db.prepare(
+    return db.prepare(
         "UPDATE week_stats SET score = score + ? WHERE chat_id = ? AND msg_id = ?"
     ).bind(score, chat_id, msg_id).run()
 }
