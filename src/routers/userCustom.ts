@@ -1,6 +1,6 @@
 import { Composer, Context } from "grammy";
 import { CfContext } from "../types";
-import { config, UserConfig } from "../config";
+import { config, ActionConfig } from "../config";
 
 const userCustomComposer = new Composer<CfContext>();
 
@@ -36,7 +36,7 @@ interface ParseContext {
     message: { message_id: number; };
 }
 
-async function parseMessage(ctx: ParseContext & Context, config: UserConfig) {
+async function parseMessage(ctx: ParseContext & Context, config: ActionConfig) {
     const chatId = ctx.chat.id;
     const { reply: shouldReply, reaction, text, sticker, animation } = config;
     const sendResponse = async (method: "text" | "sticker" | "animation", payload: string) => {

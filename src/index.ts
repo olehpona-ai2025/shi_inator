@@ -1,10 +1,11 @@
 import { Bot, webhookCallback } from "grammy";
 import { CfContext } from "@/types";
-import { ReactionComposer, sendStatsToAllowedChats } from "@/routers/reactions";
+import { ReactionComposer } from "@/routers/reactions";
 import { userCustomComposer } from "@/routers/userCustom";
 import { customMessagesComposer } from "./routers/customMessages";
 import { debugComposer } from "./routers/debug";
-import { config, loadConfig } from "./config";
+import { loadConfig } from "./config";
+import { CronContext, CronRouter } from "./cron/cronRouter";
 
 
 export default {
@@ -39,14 +40,14 @@ export default {
         }
     },
     async scheduled(controller, env, ctx) {
-        const bot = new Bot<CfContext>(env.BOT_TOKEN);
+        const bot = new Bot(env.BOT_TOKEN);
         await loadConfig(env);
-        await sendStatsToAllowedChats(bot.api, env.shi_inator_db);
+        const cronContext: CronContext = {
+            bot,
+            db: env.shi_inator_db,
+            executionCtx: ctx
+        };
+        await CronRouter.routeJob(controller.cron, cronContext);
 
-        try {
-            await env.shi_inator_db.prepare("DELETE FROM week_stats").run();
-        } catch (e) {
-            console.error("DB drop error", e);
-        }
     },
 } satisfies ExportedHandler<Env>;

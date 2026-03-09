@@ -8,10 +8,8 @@ interface ActionConfig {
     reply?: boolean;
 }
 
-interface UserConfig extends ActionConfig { }
-
 interface ChatConfig {
-    users: Record<number, UserConfig[]>;
+    users: Record<number, ActionConfig[]>;
 }
 
 interface Config {
@@ -31,8 +29,10 @@ interface KvConfig {
 let config: Config;
 
 async function loadConfig(env: Env) {
-    let kv_config = await env.CONFIG.get("CONFIG", { type: 'json' }) as KvConfig;
+    const kv_config = await env.CONFIG.get("CONFIG", { type: 'json' }) as KvConfig;
     config = { ...kv_config, allowed_chats: new Set(kv_config.allowed_chats), admins: new Set(kv_config.admins) };
 }
 
-export { loadConfig, config, ActionConfig, UserConfig, ChatConfig };
+const YoutubeVideo = "https://www.youtube.com/watch?v=1cZfToXsgHM";
+
+export { loadConfig, config, ActionConfig, ChatConfig, YoutubeVideo };

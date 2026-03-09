@@ -8,10 +8,10 @@ export async function addNewMessage(db: D1Database, data: MessageCreationData) {
     ).bind(data.message_id, data.chat_id, data.author_id, data.author_name).run()
 }
 
-export async function updateMessageScore(db: D1Database, chat_id: number, msg_id: number, score: number) {
+export async function updateMessageScore(db: D1Database, chat_id: number, msg_id: number, author_id: number, score: number) {
     return db.prepare(
-        "UPDATE week_stats SET score = score + ? WHERE chat_id = ? AND msg_id = ?"
-    ).bind(score, chat_id, msg_id).run()
+        "UPDATE week_stats SET score = score + ? WHERE chat_id = ? AND msg_id = ? AND author_id != ?"
+    ).bind(score, chat_id, msg_id, author_id).run()
 }
 
 export interface DataResult {
