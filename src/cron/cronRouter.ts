@@ -1,6 +1,6 @@
 import { Bot } from "grammy";
 import { weeklyStats } from "./weeklyStats";
-import { sixSeven } from "./sixSeven";
+import { counter } from "./counter";
 
 export interface CronContext {
     bot: Bot;
@@ -18,8 +18,8 @@ export class CronRouter {
         "0 18 * * SUN": [
             weeklyStats
         ],
-        "0 6 * * *": [
-            sixSeven
+        "0 5 * * *": [
+            counter
         ]
     };
 
