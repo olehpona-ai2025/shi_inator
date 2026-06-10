@@ -7,6 +7,7 @@ import { debugComposer } from "./routers/debug";
 import { loadConfig } from "./config";
 import { CronContext, CronRouter } from "./cron/cronRouter";
 import { ReplyComposer } from "./routers/questionAnswer";
+import { ClearComposer } from "./routers/clearDickGrowerBot";
 
 
 export default {
@@ -33,6 +34,7 @@ export default {
         bot.use(userCustomComposer);
         bot.use(customMessagesComposer);
         bot.use(ReplyComposer);
+        bot.use(ClearComposer)
 
         try {
             return await webhookCallback(bot, "cloudflare-mod")(request);

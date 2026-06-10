@@ -8,6 +8,19 @@ export async function addNewMessage(db: D1Database, data: MessageCreationData) {
     ).bind(data.message_id, data.chat_id, data.author_id, data.author_name).run()
 }
 
+export async function storeBotMessage(db: D1Database, message_id: number, chat_id: number) {
+    return db.prepare(
+        "INSERT OR IGNORE INTO bot_messages (msg_id, chat_id) VALUES (?, ?)"
+    ).bind(message_id, chat_id).run()
+}
+
+export async function getBotMessages(db: D1Database): Promise<{ msg_id: number; chat_id: number }[]> {
+    const { results } = await db.prepare(
+        "DELETE FROM bot_messages RETURNING msg_id, chat_id"
+    ).all<{ msg_id: number; chat_id: number }>();
+    return results;
+}
+
 export async function updateMessageScore(db: D1Database, chat_id: number, msg_id: number, author_id: number, score: number) {
     return db.prepare(
         "UPDATE week_stats SET score = score + ? WHERE chat_id = ? AND msg_id = ? AND author_id != ?"

@@ -1,5 +1,6 @@
 import { Bot } from "grammy";
 import { weeklyStats } from "./weeklyStats";
+import { clearDickGrowerBot } from "@/routers/clearDickGrowerBot";
 
 export interface CronContext {
     bot: Bot;
@@ -16,6 +17,9 @@ export class CronRouter {
     private static cronJobs: CronJob = {
         "0 18 * * SUN": [
             weeklyStats
+        ],
+        "0 6 * * *": [
+            clearDickGrowerBot
         ]
     };
 

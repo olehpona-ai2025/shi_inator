@@ -19,7 +19,8 @@ id = "37b3273da8244e11922088984cea6695"
 
 [triggers]
 crons = [
-    "0 18 * * SUN"
+    "0 18 * * SUN",
+    "0 6 * * *"
 ]
 
 [env.dev]
