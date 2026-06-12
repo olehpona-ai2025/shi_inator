@@ -1,134 +1,94 @@
-import { Composer, InlineKeyboard } from "grammy"
+import { config } from "@/config";
+import { addNewMessage, getChatStats } from "@/db";
+import {
+  buildStatsMessage,
+  sendStatsToAllowedChats,
+  updateMessageScoreOnReactionChange,
+} from "@/services/reactionService";
 import { CfContext } from "@/types";
-import { config, YoutubeVideo } from "@/config";
-import { addNewMessage, DataResult, getChatStats, updateMessageScore } from "@/db";
+import { Composer } from "grammy";
 
-const ReactionComposer = new Composer<CfContext>();
+export const ReactionComposer = new Composer<CfContext>();
 
-export function calculateReactionValue(reactions: string[]): number {
-    return reactions.reduce((acc, reaction) => acc + (config.reaction_map[reaction] || 0), 0);
-}
+const requestFilter = ReactionComposer.filter((ctx) => {
+  const chatId = ctx.chat?.id;
+  const user = ctx.from;
 
-ReactionComposer.on("message_reaction", async (ctx, next) => {
-    const isUser = ctx.messageReaction.user && !ctx.messageReaction.user.is_bot;
-    const isAllowedChat = config.allowed_chats.has(ctx.messageReaction.chat.id);
-    if (!isUser || !isAllowedChat) {
-        await next();
-        return;
-    };
+  if (!chatId || !user || user.is_bot) return false;
 
-    const old_reactions = calculateReactionValue(ctx.messageReaction.old_reaction.map((reaction) => reaction.type == "emoji" ? reaction.emoji : ""));
-    const new_reactions = calculateReactionValue(ctx.messageReaction.new_reaction.map((reaction) => reaction.type == "emoji" ? reaction.emoji : ""));
-
-    ctx.executionCtx.waitUntil(updateMessageScore(ctx.db, ctx.messageReaction.chat.id, ctx.messageReaction.message_id, ctx.messageReaction.user!.id, new_reactions - old_reactions));
-    await next();
+  return config.chats[chatId]?.reactions !== undefined;
 });
 
-ReactionComposer.on("message", async (ctx, next) => {
-    if (ctx.from?.is_bot) {
-        await next();
-        return;
-    }
+const reactionFilter = ReactionComposer.filter((ctx) => {
+  const reaction = ctx.messageReaction;
+  if (!reaction) return false;
 
-    if (!config.allowed_chats.has(ctx.chat.id)) {
-        await next();
-        return;
-    }
-
-    ctx.executionCtx.waitUntil(addNewMessage(ctx.db, {
-        message_id: ctx.message.message_id,
-        chat_id: ctx.chat.id,
-        author_id: ctx.from.id,
-        author_name: ctx.from.username || ctx.from.first_name
-    }));
-    await next();
+  const user = reaction.user;
+  if (!user || user.is_bot) return false;
+  return config.chats[reaction.chat.id]?.reactions !== undefined;
 });
 
-function escapeMd(text: string): string {
-    return text.replace(/[_*[\]`]/g, '\\$&');
-}
+reactionFilter.on("message_reaction", async (ctx, next) => {
+  const chatId = ctx.chat.id;
+  const userId = ctx.messageReaction.user?.id;
+  const messageId = ctx.messageReaction.message_id;
 
-function buildStatsMessage(data: DataResult[]): string {
-    let responseText = `📊 **Тижневі Статистики:**\nНа основі реакцій під повідомленнями\n\n`;
-    const leaders = data.filter(u => u.score >= 0);
-    if (leaders.length > 0) {
-        responseText += "🏆 **Герої сьогодення:**\n";
-        leaders.forEach((u, i) => responseText += `${i + 1}. @${escapeMd(u.name)}: *${u.score}*\n`);
-    }
-    const losers = data.filter(u => u.score < 0).reverse();
-    if (losers.length > 0) {
-        responseText += "\n🤡 **Крінж-відділ:**\n";
-        losers.forEach((u, i) => responseText += `${i + 1}. @${escapeMd(u.name)}: *${u.score}*\n`);
-    }
-    return responseText;
-}
-
-ReactionComposer.chatType("private").command("weekstats", async (ctx, next) => {
-    if (!config.admins.has(ctx.chat.id)) {
-        await next();
-        return;
-    };
-
-    const match = ctx.match as string;
-    const args = match ? match.split(/\s+/) : [];
-
-    if (args.length < 1) {
-        await ctx.reply("❌ Будь ласка, вкажи ID чату.");
-        await next();
-        return;
-    }
-
-    const chatId = args[0];
-    const data = await getChatStats(ctx.db, Number(chatId));
-    if (data.length === 0) {
-        await ctx.reply("❌ Немає даних для цього чату.");
-        await next();
-        return;
-    }
-
-    const inlineKeyboard = new InlineKeyboard()
-        .url("Деталі", YoutubeVideo);
-
-    const statsMessage = buildStatsMessage(data);
-    await ctx.reply(statsMessage, { parse_mode: "Markdown", reply_markup: inlineKeyboard });
+  if (!userId) {
     await next();
+    return;
+  }
+
+  ctx.executionCtx.waitUntil(
+    updateMessageScoreOnReactionChange(
+      ctx.db,
+      chatId,
+      messageId,
+      userId,
+      ctx.messageReaction.old_reaction,
+      ctx.messageReaction.new_reaction,
+    ),
+  );
+  await next();
 });
 
-interface SendTrait {
-    sendMessage: (chat_id: number, text: string, other: any) => Promise<any>
-}
-
-async function sendStats(bot: SendTrait, d1: D1Database, chatId: number) {
-    const data = await getChatStats(d1, chatId);
-    if (data.length === 0) {
-        return;
-    }
-    const statsMessage = buildStatsMessage(data);
-    try {
-
-        const inlineKeyboard = new InlineKeyboard()
-            .url("Деталі", YoutubeVideo);
-        await bot.sendMessage(chatId, statsMessage, { parse_mode: "Markdown", reply_markup: inlineKeyboard });
-    } catch (e) {
-        console.error(`❌ Помилка при відправці статистики до чату ${chatId}:`, e);
-    }
-}
-
-ReactionComposer.chatType("private").command("manual_weekstats", async (ctx, next) => {
-    if (!config.admins.has(ctx.chat.id)) {
-        await next();
-        return;
-    };
-    for (const chat_id of config.allowed_chats) {
-        await sendStats(ctx.api, ctx.db, chat_id);
-    }
-    await next();
+requestFilter.on("message", async (ctx, next) => {
+  ctx.executionCtx.waitUntil(
+    addNewMessage(ctx.db, {
+      message_id: ctx.message.message_id,
+      chat_id: ctx.chat.id,
+      author_id: ctx.from.id,
+      author_name: ctx.from.username || ctx.from.first_name,
+    }),
+  );
+  await next();
 });
 
-async function sendStatsToAllowedChats(bot: SendTrait, d1: D1Database) {
-    for (const chat_id of config.allowed_chats) {
-        await sendStats(bot, d1, chat_id);
-    }
-}
+const adminProtected = ReactionComposer.chatType("private").filter((ctx) =>
+  config.admins.has(ctx.chat.id),
+);
 
-export { ReactionComposer, sendStatsToAllowedChats };
+adminProtected.command("weekstats", async (ctx) => {
+  const match = ctx.match;
+  const args = match ? match.split(/\s+/) : [];
+
+  if (args.length < 1) {
+    await ctx.reply("❌ Будь ласка, вкажи ID чату.");
+    return;
+  }
+
+  const chatId = args[0];
+  const data = await getChatStats(ctx.db, Number(chatId));
+  if (data.length === 0) {
+    await ctx.reply("❌ Немає даних для цього чату.");
+    return;
+  }
+
+  const statsMessage = buildStatsMessage(data);
+  await ctx.reply(statsMessage, {
+    parse_mode: "Markdown",
+  });
+});
+
+adminProtected.command("manual_weekstats", async (ctx) => {
+  await sendStatsToAllowedChats(ctx.api, ctx.db);
+});

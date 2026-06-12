@@ -6,10 +6,10 @@
     "moduleResolution": "bundler",
     "strict": true,
     "skipLibCheck": true,
-    "baseUrl": ".", 
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "types": ["node"]
   },
-  "include": ["worker-configuration.d.ts", "src/**/*.ts"]
+  "include": ["worker-configuration.d.ts", "src/**/*.ts", "eslint.config.ts"]
 }

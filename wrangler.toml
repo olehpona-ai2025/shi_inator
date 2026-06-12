@@ -13,10 +13,6 @@ binding = "shi_inator_db"
 database_name = "shi_inator_db"
 database_id = "2d345473-d7cc-46bf-a354-ec82e272c85b"
 
-[[kv_namespaces]]
-binding = "CONFIG"
-id = "37b3273da8244e11922088984cea6695"
-
 [triggers]
 crons = [
     "0 18 * * SUN",
@@ -27,10 +23,6 @@ crons = [
 name = "shi-inator-dev"
 main = "src/index.ts"
 compatibility_date = "2026-01-01"
-
-[[env.dev.kv_namespaces]]
-binding = "CONFIG"
-id = "651eaa40345d41eabe3a7f55fc2df005"
 
 [[env.dev.d1_databases]]
 binding = "shi_inator_db"

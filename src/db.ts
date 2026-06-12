@@ -27,13 +27,13 @@ export async function updateMessageScore(db: D1Database, chat_id: number, msg_id
     ).bind(score, chat_id, msg_id, author_id).run()
 }
 
-export interface DataResult {
+export interface ReactionCountResult {
     name: string;
     score: number;
 }
 
 
-export async function getChatStats(db: D1Database, chat_id: number): Promise<DataResult[]> {
+export async function getChatStats(db: D1Database, chat_id: number): Promise<ReactionCountResult[]> {
     const query = `
     WITH UserScores AS (
         SELECT 
@@ -55,6 +55,6 @@ export async function getChatStats(db: D1Database, chat_id: number): Promise<Dat
     ORDER BY score DESC;
     `;
 
-    const { results } = await db.prepare(query).bind(chat_id).all<DataResult>();
+    const { results } = await db.prepare(query).bind(chat_id).all<ReactionCountResult>();
     return results;
 }

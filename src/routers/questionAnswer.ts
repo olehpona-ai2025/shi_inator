@@ -1,62 +1,16 @@
 import { Composer } from "grammy";
 import { CfContext } from "../types";
-
-const phrases = [
-    "Зафіксував. Всім похуй.",
-    "Деканат просив передати, що ти заїбав.",
-    "ХЗ, я тут просто сервер грію.",
-    "Пішов нахуй, я на перекурі.",
-    "На перездачі дізнаєшся.",
-    "Відповідь шукай між «відрахуванням» і «вільною касою».",
-    "Сорі, ця інфа доступна тільки на платній формі.",
-    "API Error: мені впадлу.",
-    "Syntax error: питання хуйня.",
-    "Ваш запит обробляється. Очікуваний час відповіді: після диплому.",
-    "Верніт Кучму!",
-    "Будапешт не указ Ромку!!!",
-    "Так",
-    "Ні",
-    "Можливо",
-    "Іди поплач старості в жилєтку.",
-    "Я б відповів, але мені за тебе соромно.",
-    "🤗",
-    "42",
-    "Після цього питання я сам подаю заяву на відрахування.",
-    "Краще подзвоніть Тарасу.",
-    "Не знаю, я в цей час спав.",
-    "Спитай у чата джипіті. Де свою любов знайти",
-    "Ні, ні, я не ту кохав",
-    "Ого, оце ти видав.",
-    "Головне — здоров'я.",
-    "Видали телеграм.",
-    "Зроз.",
-    "🗿",
-    "Не на часі.",
-    "Огида",
-    "Ок. - Жак Фреско",
-    "От і думайте",
-    "Чимодан, вокзал, ЛНУ",
-    "Рости великий",
-    "Звучить як хуйня, продовжуй.",
-    "Користувач Роман Бочуляк покинув чат",
-    "Якщо я скажу 'так', ти від'їбешся?",
-    "Засуджую"
-];
+import { config } from "@/config";
+import { getRandomPhrase } from "@/services/questionAnswerService";
 
 export const ReplyComposer = new Composer<CfContext>();
 
-ReplyComposer.command("answer", async (ctx, next) => {
-    if (!ctx.message) {
-        await next();
-        return;
-    }
+const requestFilter = ReplyComposer.filter((ctx) => {
+  return ctx.chat !== undefined && config.chats[ctx.chat.id]?.questionAnswer === true;
+})
 
-    const randomIndex = Math.floor(Math.random() * phrases.length);
-    const randomPunch = phrases[randomIndex];
-
-    await ctx.reply(randomPunch, {
-        reply_parameters: { message_id: ctx.message.message_id }
+requestFilter.command("answer", async (ctx) => {
+    await ctx.reply(getRandomPhrase(), {
+        reply_parameters: { message_id: ctx.message!.message_id }
     });
-
-    await next();
 });

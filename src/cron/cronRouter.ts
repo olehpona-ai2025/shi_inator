@@ -1,9 +1,9 @@
-import { Bot } from "grammy";
+import { Api, RawApi } from "grammy";
 import { weeklyStats } from "./weeklyStats";
-import { clearDickGrowerBot } from "@/routers/clearDickGrowerBot";
+import { clearDickGrowerBot } from "@/services/clearDickGrowerBotService";
 
 export interface CronContext {
-    bot: Bot;
+    api: Api<RawApi>;
     db: D1Database;
     executionCtx: ExecutionContext;
 }
@@ -24,9 +24,9 @@ export class CronRouter {
     };
 
     static async routeJob(cronTime: string, ctx: CronContext) {
-        let promiseArray: Promise<void>[] = [];
+        const promiseArray: Promise<void>[] = [];
         if (!CronRouter.cronJobs[cronTime]) return;
-        for (let func of CronRouter.cronJobs[cronTime]) {
+        for (const func of CronRouter.cronJobs[cronTime]) {
             promiseArray.push(func(ctx));
         }
         await Promise.all(promiseArray);

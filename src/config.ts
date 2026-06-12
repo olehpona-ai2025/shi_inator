@@ -1,38 +1,104 @@
 interface ActionConfig {
-    sticker?: string;
-    text?: string;
-    animation?: string;
-    reaction?: string;
-    random?: number;
-    timeout?: number;
-    reply?: boolean;
+  sticker?: string;
+  text?: string;
+  animation?: string;
+  reaction?: string;
+  random?: number;
+  timeout?: number;
+  reply?: boolean;
 }
 
+type ActionChatConfig = Record<number, ActionConfig[]>;
+type QuestionAnswerChatConfig = boolean;
+
+interface ReactionConfig {
+  map: Record<string, number>;
+}
+type ClearDickGrowerBotChatConfig = boolean;
+
 interface ChatConfig {
-    users: Record<number, ActionConfig[]>;
+  customActions?: ActionChatConfig;
+  questionAnswer?: QuestionAnswerChatConfig;
+  reactions?: ReactionConfig;
+  clearDickGrowerBot?: ClearDickGrowerBotChatConfig;
 }
 
 interface Config {
-    allowed_chats: Set<number>;
-    admins: Set<number>;
-    update_config: Record<number, ChatConfig>;
-    reaction_map: Record<string, number>;
+  chats: Record<number, ChatConfig>;
+  admins: Set<number>;
 }
 
-interface KvConfig {
-    allowed_chats: number[];
-    admins: number[];
-    update_config: Record<number, ChatConfig>;
-    reaction_map: Record<string, number>;
-}
+const config: Config = {
+  admins: new Set([1157828407]),
+  chats: {
+    [-1002750833285]: {
+      clearDickGrowerBot: true,
+      questionAnswer: true,
+      reactions: {
+        map: {
+          "👍": 1,
+          "❤": 1,
+          "🔥": 1,
+          "🥰": 1,
+          "👏": 1,
+          "😁": 1,
+          "🎉": 1,
+          "🤩": 1,
+          "🙏": 1,
+          "🕊️": 1,
+          "🐳": 1,
+          "⚡": 1,
+          "🤯": 1,
+          "💯": 1,
+          "❤‍🔥": 1,
+          "👎": -1,
+          "💩": -1,
+          "🤮": -2,
+          "🤦": -1,
+          "🤬": -1,
+          "🖕": -1,
+          "💔": -1,
+          "🤡": -2,
+        },
+      },
+      customActions: {
+        [1043033198]: [{ reaction: "🤡", random: 30, timeout: 10 }],
+        [1125505843]: [{ reaction: "🔥" }],
+        [1979765201]: [{ reaction: "🏆" }],
+        [5923340571]: [{ reaction: "😍" }],
+      },
+    },
+    [-1003545584995]: {
+      questionAnswer: true,
+      customActions: {
+        [534062947]: [
+          {
+            sticker:
+              "CAACAgIAAxkBAAOXaWfvXGwuOBTV0Csy1yb5F9ldo44AAiFaAAJE2OFIDpOkrA4hvX04BA",
+            reply: true,
+          },
+        ],
+        [1125505843]: [{ "reaction": "🔥" }],
+        [1979765201]: [{ "reaction": "🏆" }],
+        [5923340571]: [{ "reaction": "😍" }]
+      },
+    },
+    [-4919067380]: {
+        questionAnswer: true,
+        customActions: {
+            [1125505843]: [{ "reaction": "🔥" }],
+            [1157828407]: [{ "reaction": "🤡" }],
+            [1979765201]: [{ "reaction": "🏆" }],
+            [5923340571]: [{ "reaction": "😍" }]
+        }
+    },
+    [-1003510672503]: {
+        questionAnswer: true,
+        customActions: {
+            [1157828407]: [{ "reaction": "🤡", timeout: 2 }],
+        }
+    }
+  },
+};
 
-let config: Config;
-
-async function loadConfig(env: Env) {
-    const kv_config = await env.CONFIG.get("CONFIG", { type: 'json' }) as KvConfig;
-    config = { ...kv_config, allowed_chats: new Set(kv_config.allowed_chats), admins: new Set(kv_config.admins) };
-}
-
-const YoutubeVideo = "https://www.youtube.com/watch?v=1cZfToXsgHM";
-
-export { loadConfig, config, ActionConfig, ChatConfig, YoutubeVideo };
+export { config, ActionConfig, ChatConfig };
