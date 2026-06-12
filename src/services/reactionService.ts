@@ -1,5 +1,10 @@
 import { config } from "@/config";
-import { ReactionCountResult, getChatStats, updateMessageScore } from "@/db";
+import {
+  getChatStats,
+  ReactionCountResult,
+  updateMessageScore,
+} from "@/db/reactions";
+import { DbClient } from "@/db/types";
 import { escapeMd } from "@/utils/md";
 import { Api, RawApi } from "grammy";
 import { MessageReactionUpdated } from "grammy/types";
@@ -25,13 +30,12 @@ export function buildStatsMessage(data: ReactionCountResult[]): string {
   return responseText;
 }
 
-
 export async function sendStats(
   api: Api<RawApi>,
-  d1: D1Database,
+  db: DbClient,
   chatId: number,
 ) {
-  const data = await getChatStats(d1, chatId);
+  const data = await getChatStats(db, chatId);
   if (data.length === 0) {
     return;
   }
@@ -45,10 +49,10 @@ export async function sendStats(
   }
 }
 
-export async function sendStatsToAllowedChats(api: Api<RawApi>, d1: D1Database) {
+export async function sendStatsToAllowedChats(api: Api<RawApi>, db: DbClient) {
   for (const [chatId, chatConfig] of Object.entries(config.chats)) {
     if (chatConfig.reactions !== undefined) {
-      await sendStats(api, d1, Number(chatId));
+      await sendStats(api, db, Number(chatId));
     }
   }
 }
@@ -69,7 +73,7 @@ function calculateReactionValue(
 }
 
 export async function updateMessageScoreOnReactionChange(
-  d1: D1Database,
+  db: DbClient,
   chatId: number,
   messageId: number,
   userId: number,
@@ -81,5 +85,5 @@ export async function updateMessageScoreOnReactionChange(
   const delta = newScore - oldScore;
   if (delta === 0) return;
 
-  await updateMessageScore(d1, chatId, messageId, userId, delta);
+  await updateMessageScore(db, { chatId, messageId, authorId: userId, delta });
 }

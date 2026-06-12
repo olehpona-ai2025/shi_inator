@@ -28,6 +28,32 @@ interface Config {
   admins: Set<number>;
 }
 
+const defaultReactionMap = {
+  "👍": 1,
+  "❤": 1,
+  "🔥": 1,
+  "🥰": 1,
+  "👏": 1,
+  "😁": 1,
+  "🎉": 1,
+  "🤩": 1,
+  "🙏": 1,
+  "🕊️": 1,
+  "🐳": 1,
+  "⚡": 1,
+  "🤯": 1,
+  "💯": 1,
+  "❤‍🔥": 1,
+  "👎": -1,
+  "💩": -1,
+  "🤮": -2,
+  "🤦": -1,
+  "🤬": -1,
+  "🖕": -1,
+  "💔": -1,
+  "🤡": -2,
+};
+
 const config: Config = {
   admins: new Set([1157828407]),
   chats: {
@@ -35,31 +61,7 @@ const config: Config = {
       clearDickGrowerBot: true,
       questionAnswer: true,
       reactions: {
-        map: {
-          "👍": 1,
-          "❤": 1,
-          "🔥": 1,
-          "🥰": 1,
-          "👏": 1,
-          "😁": 1,
-          "🎉": 1,
-          "🤩": 1,
-          "🙏": 1,
-          "🕊️": 1,
-          "🐳": 1,
-          "⚡": 1,
-          "🤯": 1,
-          "💯": 1,
-          "❤‍🔥": 1,
-          "👎": -1,
-          "💩": -1,
-          "🤮": -2,
-          "🤦": -1,
-          "🤬": -1,
-          "🖕": -1,
-          "💔": -1,
-          "🤡": -2,
-        },
+        map: defaultReactionMap,
       },
       customActions: {
         [1043033198]: [{ reaction: "🤡", random: 30, timeout: 10 }],
@@ -78,26 +80,30 @@ const config: Config = {
             reply: true,
           },
         ],
-        [1125505843]: [{ "reaction": "🔥" }],
-        [1979765201]: [{ "reaction": "🏆" }],
-        [5923340571]: [{ "reaction": "😍" }]
+        [1125505843]: [{ reaction: "🔥" }],
+        [1979765201]: [{ reaction: "🏆" }],
+        [5923340571]: [{ reaction: "😍" }],
       },
     },
     [-4919067380]: {
-        questionAnswer: true,
-        customActions: {
-            [1125505843]: [{ "reaction": "🔥" }],
-            [1157828407]: [{ "reaction": "🤡" }],
-            [1979765201]: [{ "reaction": "🏆" }],
-            [5923340571]: [{ "reaction": "😍" }]
-        }
+      questionAnswer: true,
+      customActions: {
+        [1125505843]: [{ reaction: "🔥" }],
+        [1157828407]: [{ reaction: "🤡" }],
+        [1979765201]: [{ reaction: "🏆" }],
+        [5923340571]: [{ reaction: "😍" }],
+      },
     },
     [-1003510672503]: {
-        questionAnswer: true,
-        customActions: {
-            [1157828407]: [{ "reaction": "🤡", timeout: 2 }],
-        }
-    }
+      questionAnswer: true,
+      reactions: {
+        map: defaultReactionMap,
+      },
+      clearDickGrowerBot: true,
+      customActions: {
+        [1157828407]: [{ reaction: "🤡", timeout: 2 }],
+      },
+    },
   },
 };
 

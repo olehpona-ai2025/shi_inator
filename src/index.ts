@@ -4,9 +4,11 @@ import { ReactionComposer } from "@/routers/reactions";
 import { userCustomComposer } from "@/routers/userCustom";
 import { customMessagesComposer } from "./routers/admin";
 import { debugComposer } from "./routers/debug";
-import { CronContext, CronRouter } from "./cron/cronRouter";
+import { CronRouter } from "./cron/cronRouter";
 import { ReplyComposer } from "./routers/questionAnswer";
 import { ClearComposer } from "./routers/clearDickGrowerBot";
+import { drizzle } from "drizzle-orm/d1";
+import { CronContext } from "./cron/context";
 
 
 export default {
@@ -14,7 +16,7 @@ export default {
         const bot = new Bot<CfContext>(env.BOT_TOKEN);
         
         bot.use(async (grammyCtx, next) => {
-            grammyCtx.db = env.shi_inator_db;
+            grammyCtx.db = drizzle(env.shi_inator_db);
             grammyCtx.executionCtx = ctx;
             await next();
         });
@@ -46,7 +48,7 @@ export default {
         const bot = new Bot(env.BOT_TOKEN);
         const cronContext: CronContext = {
             api: bot.api,
-            db: env.shi_inator_db,
+            db: drizzle(env.shi_inator_db),
             executionCtx: ctx
         };
         await CronRouter.routeJob(controller.cron, cronContext);

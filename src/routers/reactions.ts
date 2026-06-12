@@ -1,5 +1,5 @@
 import { config } from "@/config";
-import { addNewMessage, getChatStats } from "@/db";
+import { addNewMessage, getChatStats } from "@/db/reactions";
 import {
   buildStatsMessage,
   sendStatsToAllowedChats,
@@ -54,10 +54,10 @@ reactionFilter.on("message_reaction", async (ctx, next) => {
 requestFilter.on("message", async (ctx, next) => {
   ctx.executionCtx.waitUntil(
     addNewMessage(ctx.db, {
-      message_id: ctx.message.message_id,
-      chat_id: ctx.chat.id,
-      author_id: ctx.from.id,
-      author_name: ctx.from.username || ctx.from.first_name,
+      messageId: ctx.message.message_id,
+      chatId: ctx.chat.id,
+      authorId: ctx.from.id,
+      authorName: ctx.from.username || ctx.from.first_name,
     }),
   );
   await next();

@@ -1,17 +1,9 @@
-import { Api, RawApi } from "grammy";
+import { CronContext } from "./context";
 import { weeklyStats } from "./weeklyStats";
 import { clearDickGrowerBot } from "@/services/clearDickGrowerBotService";
 
-export interface CronContext {
-    api: Api<RawApi>;
-    db: D1Database;
-    executionCtx: ExecutionContext;
-}
-
 export type CronFunction = (ctx: CronContext) => Promise<void>;
-
 type CronJob = Record<string, CronFunction[]>;
-
 
 export class CronRouter {
     private static cronJobs: CronJob = {

@@ -11,5 +11,5 @@
     },
     "types": ["node"]
   },
-  "include": ["worker-configuration.d.ts", "src/**/*.ts", "eslint.config.ts"]
+  "include": ["worker-configuration.d.ts", "src/**/*.ts", "eslint.config.ts", "drizzle.config.ts"],
 }

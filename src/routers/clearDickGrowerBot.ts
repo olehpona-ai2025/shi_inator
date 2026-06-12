@@ -1,7 +1,7 @@
 import { Composer } from "grammy";
 import { CfContext } from "@/types";
 import { config } from "@/config";
-import { storeBotMessage } from "@/db";
+import { storeBotMessage } from "@/db/dickGrowerBot";
 
 export const ClearComposer = new Composer<CfContext>();
 
@@ -24,7 +24,7 @@ const requestFilter = ClearComposer.filter((ctx) => {
 
 requestFilter.on("message", async (ctx, next) => {
   ctx.executionCtx.waitUntil(
-     storeBotMessage(ctx.db, ctx.message.message_id, ctx.message.chat.id),
+    storeBotMessage(ctx.db, ctx.message.message_id, ctx.message.chat.id),
   );
   await next();
 });
