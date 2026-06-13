@@ -1,5 +1,5 @@
 import { config } from "@/config";
-import { addNewMessage, getChatStats } from "@/db/reactions";
+import { addNewMessage, getChatStats } from "@/db/reactionsRepository";
 import {
   buildStatsMessage,
   sendStatsToAllowedChats,

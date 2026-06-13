@@ -1,5 +1,5 @@
 import { CronContext } from "@/cron/context";
-import { getBotMessages } from "@/db/dickGrowerBot";
+import { getBotMessages } from "@/db/dickGrowerBotRepository";
 
 export async function clearDickGrowerBot(ctx: CronContext) {
   const messages = await getBotMessages(ctx.db);

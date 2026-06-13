@@ -4,7 +4,7 @@ import { ReactionComposer } from "@/routers/reactions";
 import { userCustomComposer } from "@/routers/userCustom";
 import { customMessagesComposer } from "./routers/admin";
 import { debugComposer } from "./routers/debug";
-import { CronRouter } from "./cron/cronRouter";
+import { CronDispatcher } from "./cron/cronDispatcher";
 import { ReplyComposer } from "./routers/questionAnswer";
 import { ClearComposer } from "./routers/clearDickGrowerBot";
 import { drizzle } from "drizzle-orm/d1";
@@ -51,7 +51,7 @@ export default {
             db: drizzle(env.shi_inator_db),
             executionCtx: ctx
         };
-        await CronRouter.routeJob(controller.cron, cronContext);
+        await CronDispatcher.routeJob(controller.cron, cronContext);
 
     },
 } satisfies ExportedHandler<Env>;

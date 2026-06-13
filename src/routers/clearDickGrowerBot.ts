@@ -1,7 +1,7 @@
 import { Composer } from "grammy";
 import { CfContext } from "@/types";
 import { config } from "@/config";
-import { storeBotMessage } from "@/db/dickGrowerBot";
+import { storeBotMessage } from "@/db/dickGrowerBotRepository";
 
 export const ClearComposer = new Composer<CfContext>();
 

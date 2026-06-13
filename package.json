@@ -13,6 +13,15 @@
     "jiti": "^2.6.1",
     "typescript-eslint": "^8.54.0"
   },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test:all": "bun run lint && bun run typecheck",
+    "deploy:dev": "wrangler deploy --env dev",
+    "deploy:prod": "wrangler deploy --env=\"\"",
+    "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push"
+  },
   "peerDependencies": {
     "typescript": "^5"
   },

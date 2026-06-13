@@ -1,11 +1,11 @@
 import { CronContext } from "./context";
 import { weeklyStats } from "./weeklyStats";
-import { clearDickGrowerBot } from "@/services/clearDickGrowerBotService";
+import { clearDickGrowerBot } from "@/cron/clearDickGrowerBot";
 
 export type CronFunction = (ctx: CronContext) => Promise<void>;
 type CronJob = Record<string, CronFunction[]>;
 
-export class CronRouter {
+export class CronDispatcher {
     private static cronJobs: CronJob = {
         "0 18 * * SUN": [
             weeklyStats
@@ -17,8 +17,8 @@ export class CronRouter {
 
     static async routeJob(cronTime: string, ctx: CronContext) {
         const promiseArray: Promise<void>[] = [];
-        if (!CronRouter.cronJobs[cronTime]) return;
-        for (const func of CronRouter.cronJobs[cronTime]) {
+        if (!CronDispatcher.cronJobs[cronTime]) return;
+        for (const func of CronDispatcher.cronJobs[cronTime]) {
             promiseArray.push(func(ctx));
         }
         await Promise.all(promiseArray);

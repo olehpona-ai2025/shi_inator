@@ -3,7 +3,7 @@ import {
   getChatStats,
   ReactionCountResult,
   updateMessageScore,
-} from "@/db/reactions";
+} from "@/db/reactionsRepository";
 import { DbClient } from "@/db/types";
 import { escapeMd } from "@/utils/md";
 import { Api, RawApi } from "grammy";
