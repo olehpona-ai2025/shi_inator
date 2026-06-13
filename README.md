@@ -50,7 +50,6 @@ Update `src/config.ts` with your chat IDs and preferred reaction mappings. Confi
 
 ### Deployment
 
-**Deployment:**
 ```bash
 bun run deploy-dev  # Deploy to the development environment
 bun run deploy-prod # Deploy to production
