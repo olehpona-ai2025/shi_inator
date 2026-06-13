@@ -48,12 +48,7 @@ The project follows a strict separation of concerns to ensure maintainability:
 ### Configuration
 Update `src/config.ts` with your chat IDs and preferred reaction mappings. Configure your `wrangler.toml` with your `BOT_TOKEN` and D1 database ID.
 
-### Development & Deployment
-
-**Local Development:**
-```bash
-bun run dev # or bunx wrangler dev
-```
+### Deployment
 
 **Deployment:**
 ```bash
