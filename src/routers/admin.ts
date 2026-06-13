@@ -7,6 +7,7 @@ import {
   removeMessage,
   sendMessageToChat,
   setMessageReaction,
+  unBanUserFromChat,
 } from "@/services/adminService";
 import { parseTelegramLink } from "@/utils/telegram";
 
@@ -34,6 +35,26 @@ adminProtected.command("ban", async (ctx) => {
 
   await banUserFromChat(ctx.api, groupId, userId);
   await ctx.reply(`User ${userId} has been banned from group ${groupId}.`);
+});
+
+adminProtected.command("unban", async (ctx) => {
+  const args = ctx.match.trim().split(/\s+/);
+
+  if (args.length < 2) {
+    await ctx.reply("Invalid format. Use: /unban <group_id> <user_id>");
+    return;
+  }
+
+  const groupId = Number(args[0]);
+  const userId = Number(args[1]);
+
+  if (isNaN(userId)) {
+    await ctx.reply("User ID must be a number.");
+    return;
+  }
+
+  await unBanUserFromChat(ctx.api, groupId, userId);
+  await ctx.reply(`User ${userId} has been unbanned from group ${groupId}.`);
 });
 
 adminProtected.command("send", async (ctx) => {

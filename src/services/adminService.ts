@@ -5,6 +5,10 @@ export async function banUserFromChat(api: Api<RawApi>, chatId: number, userId: 
     await api.banChatMember(chatId, userId);
 }
 
+export async function unBanUserFromChat(api: Api<RawApi>, chatId: number, userId: number) {
+  await api.unbanChatMember(chatId, userId)
+}
+
 export async function copyMessageToChat(api: Api<RawApi>, targetChatId: number, sourceChatId: number, messageId: number) {
     await api.copyMessage(targetChatId, sourceChatId, messageId);
 }
