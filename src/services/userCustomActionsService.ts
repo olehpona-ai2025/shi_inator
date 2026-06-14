@@ -21,6 +21,8 @@ async function sendResponse(
     await api.setMessageReaction(chatId, messageId, [
       { type: "emoji", emoji: config.reaction } as ReactionType,
     ]);
+  } else if (config.deleteMessage) {
+    await api.deleteMessage(chatId, messageId);
   }
 }
 

@@ -1,4 +1,5 @@
 interface ActionConfig {
+  deleteMessage?: boolean;
   sticker?: string;
   text?: string;
   animation?: string;

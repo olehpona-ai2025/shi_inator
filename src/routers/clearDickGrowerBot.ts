@@ -7,7 +7,7 @@ export const ClearComposer = new Composer<CfContext>();
 
 const requestFilter = ClearComposer.filter((ctx) => {
   const chatId = ctx.chat?.id;
-  
+
   if (!chatId || config.chats[chatId]?.clearDickGrowerBot === undefined) {
     return false;
   }
@@ -28,5 +28,3 @@ requestFilter.on("message", async (ctx, next) => {
   );
   await next();
 });
-
-
